@@ -1,3 +1,23 @@
+import torch
+
+def get_device():
+    if torch.cuda.is_available():
+        device = "cuda"
+        print("Using GPU (CUDA)")
+    elif torch.backends.mps.is_available():
+        device = "mps"
+        print("Using Apple MPS")
+    else:
+        device = "cpu"
+        print("Using CPU")
+    return device
+
+def clean_memory(device="cpu"):
+    if device == "cuda":
+        torch.cuda.empty_cache()
+    elif device == "mps":
+        torch.mps.empty_cache()
+
 
 def chunk_text(text, chunk_size=128):
     words = text.split()

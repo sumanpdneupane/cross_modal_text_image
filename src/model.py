@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import models
-from transformers import DistilBertTokenizer, DistilBertModel
+from transformers import DistilBertTokenizer
+from transformers import DistilBertModel
 from src.utils.utils import chunk_text
 
 class TextEncoder(nn.Module):
@@ -11,12 +12,17 @@ class TextEncoder(nn.Module):
         self.device = device
         self.max_chunk_length = max_chunk_length
 
-        # DistilBERT tokenizer + model
+        # DistilBERT
         self.tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
         self.bert = DistilBertModel.from_pretrained("distilbert-base-uncased")
 
-        # Projection + normalization
-        self.projection = nn.Linear(self.bert.config.hidden_size, embed_dim)
+        hidden_dim = self.bert.config.hidden_size  # 768
+
+        # Projection head (MATCHES ImageEncoder)
+        self.projection = nn.Linear(hidden_dim, embed_dim)
+        self.activation = nn.GELU()
+        self.linear = nn.Linear(embed_dim, embed_dim)
+
         self.norm = nn.LayerNorm(embed_dim)
         self.dropout = nn.Dropout(dropout)
 
@@ -25,15 +31,15 @@ class TextEncoder(nn.Module):
     def forward(self, texts):
         batch_embeddings = []
 
-        # Flatten all chunks across the batch
+        # ---- Chunk texts ----
         all_chunks = []
-        chunk_map = []  # maps each chunk to its text index
-        for i, text in enumerate(texts):
-            chunks = chunk_text(text, chunk_size=self.max_chunk_length)
+        chunk_map = []
+        for idx, text in enumerate(texts):
+            chunks = chunk_text(text, self.max_chunk_length)
             all_chunks.extend(chunks)
-            chunk_map.extend([i] * len(chunks))
+            chunk_map.extend([idx] * len(chunks))
 
-        # Tokenize all chunks at once (batched)
+        # ---- Tokenize ----
         encoded = self.tokenizer(
             all_chunks,
             padding=True,
@@ -42,40 +48,64 @@ class TextEncoder(nn.Module):
             return_tensors="pt"
         ).to(self.device)
 
-        # Forward pass through DistilBERT
+        # ---- BERT forward ----
         outputs = self.bert(**encoded)
-        # Mean pooling over token embeddings
-        chunk_embeddings = outputs.last_hidden_state.mean(dim=1)  # [num_chunks, hidden_size]
+        chunk_embeddings = outputs.last_hidden_state.mean(dim=1)
 
-        # Pool chunks back into full text embeddings
+        # ---- Pool chunks per text ----
         chunk_map = torch.tensor(chunk_map, device=self.device)
         for i in range(len(texts)):
             pooled = chunk_embeddings[chunk_map == i].mean(dim=0)
             batch_embeddings.append(pooled)
 
-        x = torch.stack(batch_embeddings)  # [batch_size, hidden_size]
-        x = self.projection(x)              # [batch_size, embed_dim]
+        x = torch.stack(batch_embeddings)
+
+        # ---- Projection head ----
+        x = self.projection(x)
+        x = self.activation(x)
+        x = self.linear(x)
         x = self.norm(x)
         x = self.dropout(x)
+
         return F.normalize(x, dim=1)
 
-
 class ImageEncoder(nn.Module):
-    def __init__(self, embed_dim=1024, dropout=0.1, device="cpu"):
+    def __init__(self, embed_dim=1024, dropout=0.1, device="cpu", pretrained=True):
         super().__init__()
         self.device = device
-        self.resnet = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
-        self.dropout = nn.Dropout(p=dropout)
-        self.resnet.fc = nn.Linear(self.resnet.fc.in_features, embed_dim)
+
+        # ResNet-50 backbone
+        self.backbone = models.resnet50(
+            weights=models.ResNet50_Weights.IMAGENET1K_V2 # DEFAULT == V2
+            if pretrained else None
+        )
+
+        # Remove classifier
+        self.backbone.fc = nn.Identity()
+        backbone_dim = 2048
+
+        # Projection head (MATCHES TextEncoder)
+        self.projection = nn.Linear(backbone_dim, embed_dim)
+        self.activation = nn.GELU()
+        self.linear = nn.Linear(embed_dim, embed_dim)
+
+        self.norm = nn.LayerNorm(embed_dim)
+        self.dropout = nn.Dropout(dropout)
+
         self.to(device)
 
     def forward(self, images):
-        x = self.resnet(images)
+        x = self.backbone(images)
+
+        x = self.projection(x)
+        x = self.activation(x)
+        x = self.linear(x)
+        x = self.norm(x)
         x = self.dropout(x)
+
         return F.normalize(x, dim=1)
 
 
-# Fusion Model
 class FusionModel(nn.Module):
     def __init__(self, text_embed_dim=1024, long_embed_dim=1024, image_embed_dim=1024, device="cpu"):
         super().__init__()

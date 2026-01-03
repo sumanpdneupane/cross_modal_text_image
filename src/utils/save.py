@@ -62,7 +62,7 @@ def load_training_n_validation_loss(folder="metrics", filename="training_and_val
 def save_retrieval_metrics(epoch, val_results, folder="metrics", filename="retrieval_metrics_log.csv"):
     os.makedirs(folder, exist_ok=True)
     file_path = os.path.join(folder, filename)
-    fieldnames = ["Epoch", "Type", "R@1", "R@5", "R@10", "MedR", "MRR"]
+    fieldnames = ["Epoch", "Type", "R@1", "R@5", "R@10"]
 
     # If file doesn't exist, create and write header
     if not os.path.exists(file_path):
@@ -80,9 +80,7 @@ def save_retrieval_metrics(epoch, val_results, folder="metrics", filename="retri
                     "Type": key,
                     "R@1": metrics['R@1'],
                     "R@5": metrics['R@5'],
-                    "R@10": metrics['R@10'],
-                    "MedR": float(metrics['MedR']),
-                    "MRR": metrics['MRR'],
+                    "R@10": metrics['R@10']
                 })
     print(f"Retrieval Metrics saved to {file_path}")
 
@@ -102,12 +100,10 @@ def load_retrieval_metrics(folder="metrics", filename="retrieval_metrics_log.csv
             epoch = int(row["Epoch"])
             metric_type = row["Type"]
             if metric_type not in metrics_data:
-                metrics_data[metric_type] = {"epoch": [], "R@1": [], "R@5": [], "R@10": [], "MedR": [], "MRR": []}
+                metrics_data[metric_type] = {"epoch": [], "R@1": [], "R@5": [], "R@10": []}
             metrics_data[metric_type]["epoch"].append(epoch)
             metrics_data[metric_type]["R@1"].append(float(row["R@1"]))
             metrics_data[metric_type]["R@5"].append(float(row["R@5"]))
             metrics_data[metric_type]["R@10"].append(float(row["R@10"]))
-            metrics_data[metric_type]["MedR"].append(float(row["MedR"]))
-            metrics_data[metric_type]["MRR"].append(float(row["MRR"]))
     print(f"Retrieval Metrics loaded from {file_path}")
     return metrics_data

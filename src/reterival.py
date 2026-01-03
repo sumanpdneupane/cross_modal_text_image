@@ -10,19 +10,13 @@ def retrieve(
         top_k=5,
         device="cpu"
 ):
-    # Unified retrieval:
-    #     - Text -> Text
-    #     - Text -> Image
-    #     - Image -> Text
-    #     - Image -> Image
-    # Returns a dictionary with scores and indices for each mode.
     model.eval()
     results = {}
 
     with torch.no_grad():
         # Text Queries
         if query_texts is not None:
-            query_text_embeds = model.forward_text(query_texts).to(device)  # [Q, D]
+            query_text_embeds = model.forward_text(query_texts).to(device)
 
             # Text -> Text
             if dataset_title_embeds is not None:
@@ -50,7 +44,7 @@ def retrieve(
         # Image Queries
         if query_images is not None:
             query_images = query_images.to(device)
-            query_img_embeds = model.forward_image(query_images)  # [Q, D]
+            query_img_embeds = model.forward_image(query_images)
 
             # Image -> Text (title)
             if dataset_title_embeds is not None:

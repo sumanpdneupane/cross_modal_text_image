@@ -3,7 +3,6 @@ import re
 from fractions import Fraction
 import numpy as np
 import pandas as pd
-import torch
 from PIL import Image
 from torch.utils.data import Dataset
 
@@ -20,7 +19,7 @@ class RecipeDataset(Dataset):
     def __getitem__(self, idx):
         row = self.data.iloc[idx]
 
-        # ---------------- Image ----------------
+        # Image
         image_name = str(row.get("Image_Name", "")).strip()
         image_path = os.path.join(self.image_dir, image_name + ".jpg")
 
@@ -30,7 +29,9 @@ class RecipeDataset(Dataset):
             image = Image.fromarray(np.zeros((224, 224, 3), dtype=np.uint8))
         image = self.transform(image)
 
-        # ---------------- Text ----------------
+
+
+        # Text
         title = self.clean_text(row.get("Title", ""))
         ingredients = self.clean_text(row.get("Ingredients", ""))
         instructions = self.clean_text(row.get("Instructions", ""))

@@ -1,14 +1,14 @@
 import random
-
 from torchvision import transforms
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader
+from torch.utils.data import Subset
 
 def get_transform(image_size):
     train_transform = transforms.Compose([
         transforms.Resize((image_size, image_size)),
-        # transforms.RandomHorizontalFlip(p=0.5),  # horizontal flip is safe
-        # transforms.RandomRotation(10),  # reduce rotation from 30° → 10° to avoid text/image distortion
-        # transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.05),  # subtle color variations
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomRotation(10),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.05),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406],
@@ -27,14 +27,16 @@ def get_transform(image_size):
     return train_transform, val_transform
 
 
-def dataset_loader(full_dataset, train_transform, val_transform, batch_size, train_ratio=0.8, seed=42):
+def dataset_loader(full_dataset, train_transform, val_transform, batch_size, seed=42):
+    train_ratio = 0.4
+
     dataset_size = len(full_dataset)
     train_size = int(train_ratio * dataset_size)
     all_indices = list(range(dataset_size))
 
     # Shuffle indices for unbiased split but reproducible
     random.seed(seed)
-    random.shuffle(all_indices)
+    # random.shuffle(all_indices)
 
     # Split
     train_indices = all_indices[:train_size]
@@ -42,7 +44,8 @@ def dataset_loader(full_dataset, train_transform, val_transform, batch_size, tra
 
     # Subsets
     train_dataset = Subset(full_dataset, train_indices)
-    val_dataset = Subset(full_dataset, val_indices)
+    # val_dataset = Subset(full_dataset, val_indices)
+    val_dataset = Subset(full_dataset, train_indices)
 
     # Set transforms for subsets
     train_dataset.dataset.transform = train_transform
