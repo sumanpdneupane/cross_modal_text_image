@@ -11,7 +11,7 @@ def show_image(img_path):
 
 
 def plot_training_n_validation_loss(epoch, training_loss, validation_loss, save_path=None):
-    plt.figure(figsize=(5, 3))
+    plt.figure(figsize=(10, 5))
     plt.plot(epoch, training_loss, label="Training Loss", marker='o', color='blue')
     plt.plot(epoch, validation_loss, label="Validation Loss", marker='s', color='orange')
     plt.xlabel("Epoch")
