@@ -71,9 +71,11 @@ can produce effective cross-modal retrieval systems even with limited resources.
 ```
 
 # Major Outcomes
+### Training and validation Summary
 ![Training Loss Summary](assets/training_and_validation_summary.png)
 
-![Training Loss Graph](assets/training_and_validation_summary.png)
+### Training and validation Curve
+![Training Loss Graph](assets/training_and_validation_graph.png)
 
 
 # Instructions to run inference using the provided .pt / .pth model file
