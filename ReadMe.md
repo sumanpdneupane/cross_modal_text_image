@@ -87,16 +87,12 @@ can produce effective cross-modal retrieval systems even with limited resources.
 
 
 # Tested Model Results
-### Outcome title -> ingredients_instructions
 ![Outcome title -> ingredients_instructions](assets/1.png)
 
-### Outcome image -> image
 ![Outcome imageimage](assets/2.png)
 
-### Outcome image -> title
 ![Outcome image -> title](assets/3.png)
 
-### Outcome image -> ingredients_instructions
 ![Outcome image -> ingredients_instructions](assets/4.png)
 
 
