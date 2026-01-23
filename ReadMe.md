@@ -69,6 +69,8 @@ Im2Recipe baseline (R@10 ≈ 0.65), the proposed approach demonstrates substanti
 Overall, the research confirms that contrastive learning and specialized multimodal encoders 
 can produce effective cross-modal retrieval systems even with limited resources.
 ```
+# Architecture
+![Architecture](assets/architecture.png)
 
 # Major Outcomes
 ### Training and validation Summary
@@ -82,6 +84,20 @@ can produce effective cross-modal retrieval systems even with limited resources.
 
 ### Comparision with research paper
 ![Comparision](assets/comparision_with_research_paper.png)
+
+
+# Tested Model Results
+### Outcome title -> ingredients_instructions
+![Outcome title -> ingredients_instructions](assets/1.png)
+
+### Outcome image -> image
+![Outcome imageimage](assets/2.png)
+
+### Outcome image -> title
+![Outcome image -> title](assets/3.png)
+
+### Outcome image -> ingredients_instructions
+![Outcome image -> ingredients_instructions](assets/4.png)
 
 
 # Instructions to run inference using the provided .pt / .pth model file
