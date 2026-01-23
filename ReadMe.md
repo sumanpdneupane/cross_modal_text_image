@@ -77,7 +77,7 @@ can produce effective cross-modal retrieval systems even with limited resources.
 ### Training and validation Curve
 ![Training Loss Graph](assets/training_and_validation_graph.png)
 
-### R@call Sumarry
+### Rcall@k Sumarry
 ![Comparision](assets/r@call_summary.png)
 
 ### Comparision with research paper
