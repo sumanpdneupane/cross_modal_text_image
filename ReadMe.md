@@ -16,6 +16,13 @@ https://www.kaggle.com/datasets/pes12017000148/food-ingredients-and-recipe-datas
 
 # Slides
 ```
+https://www.canva.com/design/DAHAJ2qFbOc/GdSRIhxqhZcPVE8rcJCSNQ/edit?utm_content=DAHAJ2qFbOc&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+```
+
+# Report
+```
+Final Project report is at:
+- report/24048785 - Suman Prasad Neupane.pdf
 ```
 
 # Installation
